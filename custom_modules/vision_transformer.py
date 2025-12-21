@@ -3,8 +3,8 @@ from torch.nn import Module, ModuleList, Linear, Softmax
 from torch.nn.parameter import Parameter
 import torch
 
-from modules.image_encoder import ImageEncoder
-from modules.transformer_block import TransformerBlock
+from custom_modules.image_encoder import ImageEncoder
+from custom_modules.transformer_block import TransformerBlock
 
 class VisionTransformer(Module):
     """

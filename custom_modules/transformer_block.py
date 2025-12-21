@@ -1,7 +1,7 @@
 from torch.nn import Module, Sequential, Linear, GELU, LayerNorm, Dropout
 from torch import Tensor
 
-from modules.attention_module import MHSAModule
+from custom_modules.attention_module import MHSAModule
 
 
 class TransformerBlock(Module):
