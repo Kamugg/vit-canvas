@@ -66,7 +66,7 @@ class VisionTransformer(Module):
         )
         self.classification_head = Linear(self.emb_dim, self.num_classes)
 
-    def forward(self, x: Tensor) -> Tensor:
+    def forward(self, x: Tensor) -> dict:
         """
         Forward function
         :param x: Batches of images (batch_size, channels, height, width)
@@ -91,8 +91,12 @@ class VisionTransformer(Module):
         # Pass through transformer blocks
 
         activations = encoded
-        for t_block in self.t_blocks:
-            activations = t_block(activations)
+
+        out_dict = {}
+        for i, t_block in enumerate(self.t_blocks):
+            activations_dict = t_block(activations)
+            out_dict[f'cls_att_tblock_{i}'] = activations_dict['cls_att']
+            activations = activations_dict['out']
 
         # Extract CLS tokens
 
@@ -101,5 +105,6 @@ class VisionTransformer(Module):
         # Pass them through the classifier
 
         logits = self.classification_head(cls_tokens)
+        out_dict['scores'] = logits
 
-        return logits
+        return out_dict

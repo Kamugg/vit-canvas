@@ -30,11 +30,11 @@ class MHSAModule(Module):
         self.attn_drop = Dropout(attn_drop)
         self.output_drop = Dropout(output_drop)
 
-    def forward(self, x: Tensor) -> Tensor:
+    def forward(self, x: Tensor) -> dict:
         """
         Forward function.
         :param x: The input tensor (batch_size, seq_len, input_dim)
-        :return: Output tensor (batch_size, seq_len, input_dim)
+        :return: Dictionary with the output tensor (batch_size, seq_len, input_dim) and the attention matrix wrt the cls token
         """
 
         # Projection
@@ -56,8 +56,15 @@ class MHSAModule(Module):
 
         # Softmax and rescale
 
-        att_mat /= math.sqrt(self.head_dim)
-        soft_att_mat = softmax(att_mat, dim=-1)
+        rescaled_att_mat = att_mat / math.sqrt(self.head_dim)
+        soft_att_mat = softmax(rescaled_att_mat, dim=-1)
+
+        # Take only first row of the attention matrix from column 1 (to exclude the cls x cls activation)
+
+        cls_att_mat = soft_att_mat[:, :, 0, 1:]
+        grid_size = int(math.sqrt(cls_att_mat.shape[-1]))
+        cls_att_mat = torch.reshape(cls_att_mat, (q.shape[0], self.num_heads, grid_size, grid_size))
+
         soft_att_mat = self.attn_drop(soft_att_mat)
 
         # Multiply by values
@@ -75,4 +82,4 @@ class MHSAModule(Module):
         output = self.output_layer(output)
         output = self.output_drop(output)
 
-        return output
+        return {'out': output, 'cls_att': cls_att_mat}

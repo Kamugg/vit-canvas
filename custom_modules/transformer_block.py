@@ -35,7 +35,7 @@ class TransformerBlock(Module):
         self.norm1 = LayerNorm(input_dim)
         self.norm2 = LayerNorm(input_dim)
 
-    def forward(self, x: Tensor) -> Tensor:
+    def forward(self, x: Tensor) -> dict:
         """
         Forward function
         :param x: Input tensor (batch_size, seq_len, input_dim)
@@ -43,7 +43,10 @@ class TransformerBlock(Module):
         """
 
         normed = self.norm1(x)
-        mhsa_out = self.mhsa(normed)
+        mhsa_dict = self.mhsa(normed)
+        mhsa_out = mhsa_dict['out']
+        cls_att = mhsa_dict['cls_att']
+
 
         # First skip
 
@@ -56,4 +59,4 @@ class TransformerBlock(Module):
 
         output = mlp_out + mhsa_out
 
-        return output
+        return {'out': output, 'cls_att': cls_att}
