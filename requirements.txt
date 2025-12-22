@@ -1,0 +1,12 @@
+matplotlib
+numpy
+onnx
+onnxruntime
+opencv_python
+scikit_learn
+streamlit
+streamlit_drawable_canvas
+torch
+torchmetrics
+torchvision
+tqdm
