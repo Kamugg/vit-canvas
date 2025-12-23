@@ -240,7 +240,7 @@ def main():
                             ToDtype(torch.float32, scale=True),
                             RandomAffine(
                                 degrees=5,  # Rotation
-                                translate=(0.2, 0.2),  # Shift
+                                translate=(0.3, 0.3),  # Shift
                                 scale=(0.7, 1.1)  # Zoom
                             ),
                             Normalize((0.1307,), (0.3081,)),
