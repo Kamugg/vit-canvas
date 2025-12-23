@@ -146,6 +146,8 @@ def time_evaluation(vit: Module, run_id: int) -> None:
     :return: None
     """
 
+    time.sleep(60) # Here because my PC kept crashing at some point during the script, let the hardware cool down maybe?
+
     vit.eval()
     vit = vit.to('cpu')
 
