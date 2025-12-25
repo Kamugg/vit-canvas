@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import streamlit as st
 from streamlit_drawable_canvas import st_canvas
 import cv2
@@ -5,12 +7,12 @@ import numpy as np
 import onnxruntime
 
 @st.cache_resource
-def get_onnx_session() -> onnxruntime.InferenceSession:
+def get_onnx_session(pth: Path) -> onnxruntime.InferenceSession:
     """
     Loads ONNX ViT.
     :return: ONNX session
     """
-    ort_session = onnxruntime.InferenceSession('experiments/chkps/microvit_run_29.onnx',
+    ort_session = onnxruntime.InferenceSession(pth,
                                                providers=['CPUExecutionProvider'])
     return ort_session
 
@@ -67,6 +69,28 @@ CANVAS_FACTOR = 12
 CANVAS_BASE = 28
 STROKE_WIDTH = 15
 
+# Model selection
+
+models = {
+    "vit-fast": "Lightweight, optimized for speed.",
+    "vit-large": "Bigger, more accurate, but slower."
+}
+st.sidebar.header("Select model:")
+selected_model = st.sidebar.radio(
+    "select_model",
+    options=models.keys(),
+    format_func=lambda x: f"**{x}**",
+    captions=models.values(),
+    index=0,
+    label_visibility="hidden",
+)
+if selected_model == "vit-fast":
+    model_path = Path('./experiments/checkpoints/vit-fast/microvit_run_3.onnx')
+elif selected_model == "vit-large":
+    model_path = Path('./experiments/checkpoints/vit-large/microvit_run_34.onnx')
+else:
+    raise ValueError("Invalid model name.")
+
 st.set_page_config(layout="wide")
 st.markdown("<h1 style='text-align: center;'>Digit classifier with ViT</h1>", unsafe_allow_html=True)
 st.space('medium')
@@ -112,7 +136,7 @@ with col2:
 # Forward pass is skipped if the canvas is empty
 if (canvas_result.image_data is not None) and (np.sum(canvas_result.image_data[:, :, :3]) > 0):
     img = preprocess_image(mnist_image)
-    sess = get_onnx_session()
+    sess = get_onnx_session(model_path)
     out = forward_pass(sess, img)
     scores = out['scores']
     expsum = np.sum(np.exp(scores))
@@ -140,12 +164,14 @@ if (canvas_result.image_data is not None) and (np.sum(canvas_result.image_data[:
     for i in range(num_layers):
         st.write(f'### Transformer block {i+1}')
         with st.container(border=True):
-            cols = st.columns(num_heads)
+            cols = st.columns(num_heads, vertical_alignment='center')
             for c, col in enumerate(cols):
                 with col:
                     att_map = out[f'cls_att_tblock_{i}'][0, c]
                     resized_att_map = cv2.resize(att_map,
                                            (CANVAS_FACTOR * CANVAS_BASE, CANVAS_FACTOR * CANVAS_BASE),
                                                  interpolation=cv2.INTER_NEAREST)
-                    st.image(overlay_attention(display_image_pixelated, resized_att_map), caption=f'Head {c}')
+                    st.image(overlay_attention(display_image_pixelated, resized_att_map),
+                             caption=f'Head {c}',
+                             width="stretch")
         st.space('small')

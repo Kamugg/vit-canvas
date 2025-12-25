@@ -25,11 +25,12 @@ NUM_CLASSES = 10
 MAX_EPOCHS = 100
 PATIENCE = 3
 PATIENCE_DELTA = 0.01
-BATCH_SIZE = 1024
+BATCH_SIZE = 256
 LR = 1e-3
 DEVICE = 'cuda'
 TIME_SAMPLES = 500
 SEED = 42
+SLEEP_TIME = 120
 
 criterion = CrossEntropyLoss()
 accuracy = Accuracy(task='multiclass', num_classes=NUM_CLASSES).to(DEVICE)
@@ -146,7 +147,8 @@ def time_evaluation(vit: Module, run_id: int) -> None:
     :return: None
     """
 
-    time.sleep(60) # Here because my PC kept crashing at some point during the script, let the hardware cool down maybe?
+    # Here because my PC kept crashing at some point during the script, let the hardware cool down maybe?
+    time.sleep(SLEEP_TIME)
 
     vit.eval()
     vit = vit.to('cpu')
@@ -215,6 +217,8 @@ def time_evaluation(vit: Module, run_id: int) -> None:
 
     if onnx_data_filename.exists():
         wandb.save(onnx_data_filename)
+
+    time.sleep(120) # Same reason
 
 
 def main():
