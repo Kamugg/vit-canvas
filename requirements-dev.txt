@@ -1,6 +1,5 @@
 matplotlib
 numpy
-onnx
 onnxruntime
 opencv_python
 scikit_learn
@@ -10,3 +9,4 @@ torch
 torchmetrics
 torchvision
 tqdm
+wandb
