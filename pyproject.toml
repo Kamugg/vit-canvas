@@ -9,7 +9,7 @@ dynamic = ["dependencies"]
 authors = [
   { name="Kamugg" },
 ]
-description = "A description of your experiment project"
+description = "Custom ViT implementation in a Streamlit app to classify hand drawn digits."
 readme = "README.md"
 requires-python = ">=3.12"
 
